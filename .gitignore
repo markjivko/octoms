@@ -1,0 +1,5 @@
+app/errors/log/*
+core/errors/log/*
+
+!app/errors/log/.gitkeep
+!core/errors/log/.gitkeep
