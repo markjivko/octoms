@@ -31,4 +31,4 @@ This project is inspired by [CodeIgniter](https://codeigniter.com)'s approach to
 
 **Warning!**
 
-Do not use this framework in a production environment.
+Do not use this framework in a production environment; this is a study/side-project from 2011.
