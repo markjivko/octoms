@@ -1,12 +1,14 @@
 <!DOCTYPE HTML>
-<html>
+<html lang="en">
     <head>
         <title>OctoMS</title>
         <link rel="stylesheet" type="text/css" href="<?php echo APP_WEBROOT;?>/public/css/style.css">
         <link rel="icon" type="image/ico" href="<?php echo WIZARD;?>/img/favicon.ico">
         <meta name="Copyright" content="OctoMS">
         <meta name="Author" content="Mark Jivko">
+        <meta name="description" content="Light-weight self-documenting PHP Framework">
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body>
         <div class="header">

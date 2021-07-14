@@ -1,6 +1,6 @@
 <?php if(!defined('OCTOMS')){header('HTTP/1.1 403');die('{"error":"forbidden"}');}?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
+<html lang="en">
     <head>
         <title>OctoMS Help</title>
         <link rel="stylesheet" type="text/css" href="<?php echo WIZARD;?>/css/style.css">
@@ -8,7 +8,9 @@
         <meta name="Copyright" content="OctoMS">
         <meta name="Author" content="Mark Jivko">
         <meta name="Robots" content="no-index">
+        <meta name="description" content="OctoMS Wizard">
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body>
         <div class="noscript">
