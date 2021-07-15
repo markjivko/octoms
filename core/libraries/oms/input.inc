@@ -14,7 +14,7 @@ class input_cl {
      * Set the default upload location relative to the ROOT
      * The constructor will change this to ROOT.DS.{}
      */
-    var $uploadDir = 'upload';
+    public $uploadDir = 'upload';
 
     /**
      * Class constructor
@@ -62,7 +62,7 @@ class input_cl {
      * 
      * @param string $superGlobal - (get, post, server or env)
      * @param string|array $val
-     * @return string|array|null<br/>
+     * @return string|array|null <br/>
      * String - if $var is a string and {superGlobal}[$var] exists<br/>
      * Array - if $var is an array and some of {superGlobal}[$key] exist<br/>
      * null - if the key was not set
@@ -129,7 +129,7 @@ class input_cl {
      * 
      * @param string|array $var - $_GET key(s) to return
      * @param array $clean - clean filters to apply
-     * @return string|array|null<br/>
+     * @return string|array|null <br/>
      * String - if $var is a string and $_GET[$var] exists<br/>
      * Array - if $var is an array and some of $_GET[$key] exist<br/>
      * null - if the key was not set
@@ -214,7 +214,7 @@ class input_cl {
      * 
      * @param string|array $var - $_POST key(s) to return
      * @param array $clean - clean filters to apply
-     * @return string|array|null<br/>
+     * @return string|array|null <br/>
      * String - if $var is a string and $_POST[$var] exists<br/>
      * Array - if $var is an array and some of $_POST[$key] exist<br/>
      * null - if the key was not set
@@ -461,7 +461,7 @@ class input_cl {
      * 
      * 
      * @param string $data
-     * @param bool $local
+     * @param boolean $local
      * @return mixed - Array or string on success, False if there is no 
      * post data or Null if the data cannot be decoded
      */

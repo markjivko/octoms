@@ -294,8 +294,8 @@ class image_cl {
      * <li>'gif'</li>
      * <li>'jpeg'</li>
      * </ul>
-     * @param bool $saveToFile #! saves in class call file directory
-     * @param bool $deleteOriginal #! delete source file?
+     * @param boolean $saveToFile #! saves in class call file directory
+     * @param boolean $deleteOriginal #! delete source file?
      * @param int $quality #! gifs don't support quality adjustment
      * @return BOOLEAN or resource
      */

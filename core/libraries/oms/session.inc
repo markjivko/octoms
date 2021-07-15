@@ -15,7 +15,7 @@ class session_cl {
      * The current session Id
      * @var string
      */
-    var $id;
+    public $id;
 
     /**
      * Class constructor
@@ -24,7 +24,7 @@ class session_cl {
      */
     public function __construct() {
         // Don't store the session Id in plain sight, encode it in our cookie instead
-        @ini_set('session.use_cookies', 0);
+        ini_set('session.use_cookies', 0);
     }
 
     /**
@@ -50,39 +50,39 @@ class session_cl {
         $cookie = $this->cookie_get();
 
         // Invalid cookie set?
-        empty($cookie) ? $this->cookie_reset() : $cookie = (array) $cookie;
-
+        if (!is_array($cookie)) {
+            $this->cookie_reset();
+        }
+        
         // Set an empty user agent
-        if (!isset($_SERVER['HTTP_USER_AGENT']))
+        if (!isset($_SERVER['HTTP_USER_AGENT'])) {
             $_SERVER['HTTP_USER_AGENT'] = '';
+        }
 
         // Verify the user's cookie x-verify credentials
-        if (isset($cookie['x-verify']) && $cookie['x-verify']->ua == md5($_SERVER['HTTP_USER_AGENT']) && $cookie['x-verify']->ip == ip2long($_SERVER['REMOTE_ADDR'])) {
+        if (is_array($cookie) && isset($cookie['x-verify']) && $cookie['x-verify']['ua'] == md5($_SERVER['HTTP_USER_AGENT']) && $cookie['x-verify']['ip'] == md5($_SERVER['REMOTE_ADDR'])) {
             // The user passed; restore the session
-            $this->id = $cookie['x-verify']->sessid;
+            $this->id = $cookie['x-verify']['sessid'];
 
             // Don't continue if the session was already started
-            if (session_id() == $this->id)
+            if (session_id() == $this->id) {
                 return $this;
+            }
         } else {
-            // Destroy the session(s)
-            session_start();
-            session_unset();
-            session_destroy();
-
             // Regenerate the session ID
             $this->id = md5(uniqid(mt_rand(), true));
 
             // Store it to the cookie
-            $this->cookie_set(
-                    array('x-verify' =>
-                        array(
-                            'sessid' => $this->id,
-                            'ua' => md5($_SERVER['HTTP_USER_AGENT']),
-                            'ip' => ip2long($_SERVER['REMOTE_ADDR'])
-                        )
+            $result = $this->cookie_set(
+                array('x-verify' =>
+                    array(
+                        'sessid' => $this->id,
+                        'ua'     => md5($_SERVER['HTTP_USER_AGENT']),
+                        'ip'     => md5($_SERVER['REMOTE_ADDR'])
                     )
+                )
             );
+            
         }
 
         // Launch the session with the generated Id
@@ -128,7 +128,7 @@ class session_cl {
         } elseif (isset($params[0]) && isset($params[1])) {
             $_SESSION[$params[0]] = $params[1];
         }
-
+        
         return $this;
     }
 
@@ -264,20 +264,29 @@ class session_cl {
      * @return boolean
      */
     public function cookie_set($value, $name = COOKIE_NAME, $expire = COOKIE_EXPIRE) {
-
         // Set the cookie if the value is not empty
-        return empty($value) ? false : setcookie($name, blowfish_encrypt(json_encode($value)), (time() + $expire), COOKIE_PATH, (false === ip2long($_SERVER['HTTP_HOST']) ? COOKIE_DOMAIN : null));
+        return empty($value) 
+            ? false 
+            : setcookie(
+                $name, 
+                blowfish_encrypt(json_encode($value)), 
+                (time() + $expire), 
+                COOKIE_PATH, 
+                DOMAIN 
+            );
     }
 
     /**
      * Get the cookie values
      * 
      * @param string $name
-     * @return string|boolean
+     * @return array|null
      */
     public function cookie_get($name = COOKIE_NAME) {
         // Return available cookie data
-        return isset($_COOKIE[$name]) ? json_decode(blowfish_decrypt($_COOKIE[$name])) : false;
+        return isset($_COOKIE[$name]) 
+            ? json_decode(blowfish_decrypt($_COOKIE[$name]), true) 
+            : null;
     }
 
     /**

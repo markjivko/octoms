@@ -195,9 +195,9 @@ class view_cl {
  */
 class view_cl_helper extends view_cl {
 
-    var $data = array();
-    var $file = null;
-    var $loaded = false;
+    public $data = array();
+    public $file = null;
+    public $loaded = false;
 
     public function __construct($file = null, $data = array()) {
         // Save the file

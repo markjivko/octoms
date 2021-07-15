@@ -13,33 +13,38 @@ class sql_cl extends octoms {
     /**
      * Long query step (in seconds)
      * All queries that take longer than this to execute will be logged as errors
+     * 
      * @var float
      */
-    const long_query_step = 1;
+    const LONG_QUERY_STEP = 1;
 
     /**
      * The MySQL connection instance
      * 
      * @var mysqli
      */
-    public static $instance;
+    public static $mysqli;
 
     /**
      * Query cache for the Run method
+     * 
      * @var array
      */
-    public static $cache;
+    protected static $_cache;
 
     /**
      * Query result
+     * 
      * @var mysqli_result|boolean
      */
-    public $result;
+    public $_result;
 
     /**
-     * Query rows
+     * Result rows
+     * 
+     * @var array|boolean
      */
-    public $rows;
+    protected $_rows = false;
 
     /**
      * More convenient than constants
@@ -91,19 +96,30 @@ class sql_cl extends octoms {
      */
     protected function _case($set = '', $by = '', $cases = array()) {
         $when = '';
+        
         foreach ($cases AS $k => $v) {
             $when .= sprintf(
                 ' WHEN \'%s\' THEN \'%s\' ',
-                mysqli_real_escape_string($k),
-                mysqli_real_escape_string($v)
+                $this->escape($k),
+                $this->escape($v)
             );
         }
+        
         return sprintf(
             'CASE `%s` %s ELSE `%s` END',
-            mysqli_real_escape_string($by),
-            $when,
-            mysqli_real_escape_string($set)
+            $this->escape($by),
+            $when
         );
+    }
+    
+    /**
+     * Escape a string
+     * 
+     * @param string $string
+     * @return string
+     */
+    public function escape($string) {
+        return mysqli_real_escape_string(self::$mysqli, $string);
     }
 
     /**
@@ -180,22 +196,21 @@ class sql_cl extends octoms {
                     foreach ($a AS $k => $v) {
                         // Sanitize the values
                         $v = is_array($v) 
-                            ? array_map('mysqli_real_escape_string', $v) 
-                            : mysqli_real_escape_string($v);
+                            ? array_map(array($this, 'escape'), $v) 
+                            : $this->escape($v);
 
                         // Append to the query
-                        $rpnp[] = '`' . mysqli_real_escape_string($k) . '` ' .
-                                (
-                                is_array($v) ?
-                                (
-                                ($not ? 'NOT ' : '') . 'IN (\'' . implode('\',\'', $v) . '\')'
-                                ) :
-                                (
-                                $like ?
-                                ($not ? 'NOT ' : '') . 'LIKE \'' :
-                                ($not ? '!' : '') . '= \''
+                        $rpnp[] = '`' . $this->escape($k) . '` ' . (
+                            is_array($v) 
+                                ? (
+                                    ($not ? 'NOT ' : '') . 'IN (\'' . implode('\',\'', $v) . '\')'
+                                ) 
+                                : (
+                                    $like 
+                                    ? ($not ? 'NOT ' : '') . 'LIKE \'' 
+                                    : ($not ? '!' : '') . '= \''
                                 ) . $v . '\''
-                                );
+                        );
                     }
                     $rpn[] = '(' . implode(' AND ', $rpnp) . ')';
                 } elseif (count($a) == 1) {
@@ -209,22 +224,21 @@ class sql_cl extends octoms {
 
                     // Sanitize the values
                     $v = is_array($v) 
-                        ? array_map('mysqli_real_escape_string', $v) 
-                        : mysqli_real_escape_string($v);
+                        ? array_map(array($this, 'escape'), $v) 
+                        : $this->escape($v);
 
                     // Append to the query
-                    $rpn[] = '`' . mysqli_real_escape_string($k) . '` ' .
-                            (
-                            is_array($v) ?
-                            (
-                            ($not ? 'NOT ' : '') . 'IN (\'' . implode('\',\'', $v) . '\')'
-                            ) :
-                            (
-                            $like ?
-                            ($not ? 'NOT ' : '') . 'LIKE \'' :
-                            ($not ? '!' : '') . '= \''
+                    $rpn[] = '`' . $this->escape($k) . '` ' . (
+                        is_array($v) 
+                            ? (
+                                ($not ? 'NOT ' : '') . 'IN (\'' . implode('\',\'', $v) . '\')'
+                            ) 
+                            : (
+                                $like 
+                                ? ($not ? 'NOT ' : '') . 'LIKE \'' 
+                                : ($not ? '!' : '') . '= \''
                             ) . $v . '\''
-                            );
+                    );
                 }
             }
             // Add an operator
@@ -232,9 +246,9 @@ class sql_cl extends octoms {
                 $e1 = array_pop($rpn);
                 $e2 = array_pop($rpn);
                 if (!is_null($e1) && !is_null($e2)) {
-                    $rpn[] = ($a == $this->AND) ?
-                            ('(' . $e2 . ' AND ' . $e1 . ')') :
-                            ('(' . $e2 . ' OR ' . $e1 . ')');
+                    $rpn[] = ($a == $this->AND)
+                        ? ('(' . $e2 . ' AND ' . $e1 . ')')
+                        : ('(' . $e2 . ' OR ' . $e1 . ')');
                 } elseif (!is_null($e1)) {
                     $rpn = array($e1);
                 }
@@ -244,8 +258,9 @@ class sql_cl extends octoms {
         // If the user did not provide enough operators, fill in with AND
         if (count($rpn) > 1) {
             foreach ($rpn AS $k => $a) {
-                if ($k != 0)
+                if ($k != 0) {
                     $rpn[0] .= ' AND ' . $a;
+                }
             }
         }
 
@@ -272,15 +287,15 @@ class sql_cl extends octoms {
         foreach ($set AS $k => $v) {
             $sqlSet[] = sprintf(
                 '`%s` = \'%s\'',
-                mysqli_real_escape_string($k),
-                mysqli_real_escape_string($v)
+                $this->escape($k),
+                $this->escape($v)
             );
         }
 
         // Return the simple update string
         return sprintf(
             'UPDATE `%s` SET %s %s',
-            mysqli_real_escape_string($table),
+            $this->escape($table),
             implode(', ', $sqlSet),
             $whereClause
         );
@@ -312,7 +327,7 @@ class sql_cl extends octoms {
         // Get the string ready
         $result = sprintf(
             'UPDATE `%s` SET ',
-            mysqli_real_escape_string($set = array_shift($args))
+            $this->escape($set = array_shift($args))
         );
 
         // Load the cases
@@ -321,7 +336,7 @@ class sql_cl extends octoms {
             if (count($a) == 3) {
                 $cases[] = sprintf(
                     '`%s` = (%s)',
-                    mysqli_real_escape_string($a[0]),
+                    $this->escape($a[0]),
                     $this->_case($a[0], $a[1], $a[2])
                 );
             }
@@ -360,19 +375,19 @@ class sql_cl extends octoms {
             $fields = '*';
         } elseif (is_array($fields)) {
             if (count($fields) > 0) {
-                $fields = '`' . implode('`, `', array_map('mysqli_real_escape_string', $fields)) . '`';
+                $fields = '`' . implode('`, `', array_map(array($this, 'escape'), $fields)) . '`';
             } else {
                 $fields = '*';
             }
         } elseif (!is_string($fields)) {
-            $fields = '`' . mysqli_real_escape_string(strval($fields)) . '`';
+            $fields = '`' . $this->escape(strval($fields)) . '`';
         }
 
         // K.i.s.s.
         return sprintf(
             'SELECT %s FROM `%s` %s',
             $fields,
-            mysqli_real_escape_string($table),
+            $this->escape($table),
             $whereClause
         );
     }
@@ -394,15 +409,15 @@ class sql_cl extends octoms {
         $sqlSet = array();
         foreach ($set AS $k => $v) {
             $sqlSet[] = sprintf('`%s` = \'%s\'',
-                mysqli_real_escape_string($k),
-                mysqli_real_escape_string($v)
+                $this->escape($k),
+                $this->escape($v)
             );
         }
 
         // Return the insert query
         return sprintf(
             'INSERT INTO `%s` SET %s',
-            mysqli_real_escape_string($table),
+            $this->escape($table),
             implode(', ', $sqlSet)
         );
     }
@@ -421,7 +436,7 @@ class sql_cl extends octoms {
      */
     public function minsert($table = '', $keys = array(), $values = array()) {
         // Sanitize the keys
-        $keys = array_map('mysqli_real_escape_string', $keys);
+        $keys = array_map(array($this, 'escape'), $keys);
         $keyCount = count($keys);
 
         // Prepare the values for the insert
@@ -434,7 +449,7 @@ class sql_cl extends octoms {
             if (count($v) == $keyCount) {
                 $values[$k] = sprintf(
                     '\'%s\'',
-                    implode("', '", array_map('mysqli_real_escape_string', $v))
+                    implode("', '", array_map(array($this, 'escape'), $v))
                 );
             } else {
                 unset($values[$k]);
@@ -444,7 +459,7 @@ class sql_cl extends octoms {
         // Return the string
         return sprintf(
             'INSERT INTO `%s` (`%s`) VALUES (%s)',
-            mysqli_real_escape_string($table),
+            $this->escape($table),
             implode("`, `", $keys),
             implode("), (", $values)
         );
@@ -466,7 +481,7 @@ class sql_cl extends octoms {
         // Return the delete query
         return sprintf(
             'DELETE FROM `%s` %s',
-            mysqli_real_escape_string($table),
+            $this->escape($table),
             $whereClause
         );
     }
@@ -482,13 +497,13 @@ class sql_cl extends octoms {
      * @return resource|boolean
      */
     public function connect($server = DB_SERV, $username = DB_USER, $password = DB_PASS) {
-        if (!isset(self::$instance)) {
-            if ((self::$instance = mysqli_connect($server, $username, $password, false)) === false) {
+        if (!isset(self::$mysqli)) {
+            if ((self::$mysqli = mysqli_connect($server, $username, $password, false)) === false) {
                 throw new Exception('Could not connect to the database.', 500);
                 return false;
             } else {
                 // Set encoding to UTF8
-                mysqli_set_charset(self::$instance, 'utf8');
+                mysqli_set_charset(self::$mysqli, 'utf8');
 
                 // Select the database
                 $this->db();
@@ -507,7 +522,7 @@ class sql_cl extends octoms {
     public function db($name = DB_DATA) {
         // Select the database
         if (!empty($name)) {
-            if (mysqli_select_db(self::$instance, $name) === true) {
+            if (mysqli_select_db(self::$mysqli, $name) === true) {
                 return $this;
             } else {
                 throw new Exception(sprintf('Could not select database "%s".', $name), 500);
@@ -528,8 +543,8 @@ class sql_cl extends octoms {
      * 
      */
     public function disconnect() {
-        if (isset(self::$instance) && self::$instance !== false) {
-            return mysqli_close(self::$instance);
+        if (isset(self::$mysqli) && self::$mysqli !== false) {
+            return mysqli_close(self::$mysqli);
         } else {
             return false;
         }
@@ -636,7 +651,7 @@ class sql_cl extends octoms {
         }
 
         // Have we cached the query?
-        if (!isset(self::$cache[$p[0]])) {
+        if (!isset(self::$_cache[$p[0]])) {
             // Transform the sql {stage name}:{sql file}:{sql query} to an array
             $sqlArr = array_reverse(explode(':', $p[0]));
 
@@ -662,14 +677,14 @@ class sql_cl extends octoms {
             $stage = isset($sqlArr[2]) ? trim(strtolower($sqlArr[2])) : $cStage;
 
             // Have we cached the sql file?
-            if (!isset(self::$cache['__files__'][$stage . DS . $file])) {
+            if (!isset(self::$_cache['__files__'][$stage . DS . $file])) {
                 // Set the sql file location
                 $f = preg_replace('%^(.*?)\\' . DS . '([^\\' . DS . ']+)\\' . DS . '(controllers|models)\\' . DS . '(.*?)$%', '$1' . DS . $stage . DS . 'sql' . DS . $file . '.sql', $info[0]['file']);
 
                 // Finally, store this file to the cache
                 if (file_exists($f)) {
                     // Read the contents
-                    self::$cache['__files__'][$stage . DS . $file] = file_get_contents($f);
+                    self::$_cache['__files__'][$stage . DS . $file] = file_get_contents($f);
                 } else {
                     throw new Exception(sprintf('Sql file (%s) not found.', $f));
                     return false;
@@ -677,12 +692,12 @@ class sql_cl extends octoms {
             }
 
             // Get the SQL file contents
-            $sql = self::$cache['__files__'][$stage . DS . $file];
+            $sql = self::$_cache['__files__'][$stage . DS . $file];
 
             // Extract the SQL statement we are looking for
             if (preg_match('%(--\s*<(q|query){1}\s*["\']{1}' . $query . '["\']{1}\s*>)([^\e]*?)(--\s*</(q|query){1})%i', $sql, $reg)) {
                 // Remove all comments
-                self::$cache[$p[0]] = preg_replace('%\s*--.*|\s*/\*([^\e]*)\*/%', '', $reg[3]);
+                self::$_cache[$p[0]] = preg_replace('%\s*--.*|\s*/\*([^\e]*)\*/%', '', $reg[3]);
 
                 // Clear the memory
                 unset($sql);
@@ -693,7 +708,7 @@ class sql_cl extends octoms {
         }
 
         // Prepare the argument list for the query
-        $p[0] = self::$cache[$p[0]];
+        $p[0] = self::$_cache[$p[0]];
 
         // Execute the query
         return call_user_func_array(array($this, 'query'), $p);
@@ -766,11 +781,10 @@ class sql_cl extends octoms {
                 }
             }
 
-            // All good :)
             return true;
-        } else {
-            return false;
         }
+        
+        return false;
     }
 
     /**
@@ -781,8 +795,8 @@ class sql_cl extends octoms {
      */
     public function query() {
         // Starting from scratch
-        $this->result = false;
-        $this->rows = false;
+        $this->_result = false;
+        $this->_rows = false;
 
         // Get the function arguments
         $args = func_get_args();
@@ -797,7 +811,7 @@ class sql_cl extends octoms {
                 if (is_array($v) || is_object($v)) {
                     $args[$k] = $this->serialize($v);
                 } else {
-                    $args[$k] = mysqli_real_escape_string($v);
+                    $args[$k] = $this->escape($v);
                 }
             }
 
@@ -808,7 +822,7 @@ class sql_cl extends octoms {
             }
 
             // Sanitize the input
-            array_walk($args, create_function('$str', 'return mysqli_real_escape_string($str);'));
+            array_walk($args, array($this, 'escape'));
 
             // Use the custom table prefix; add the query to the args list
             array_unshift($args, str_replace('{pref}', DB_PREF, $querySting));
@@ -832,7 +846,7 @@ class sql_cl extends octoms {
             $sqlTime = microtime(true);
 
             // Execute the query
-            $this->result = mysqli_query(self::$instance, $querySting);
+            $this->_result = mysqli_query(self::$mysqli, $querySting);
 
             // Total execution time
             $sqlTime = number_format(microtime(true) - $sqlTime, 6);
@@ -855,13 +869,13 @@ class sql_cl extends octoms {
             $sqlTime = microtime(true);
 
             // Execute the query
-            $this->result = mysqli_query(self::$instance, $querySting);
+            $this->_result = mysqli_query(self::$mysqli, $querySting);
 
             // Total execution time
             $sqlTime = microtime(true) - $sqlTime;
 
             // Long query?
-            if ($sqlTime >= sql_cl::long_query_step) {
+            if ($sqlTime >= sql_cl::LONG_QUERY_STEP) {
                 // Get the caller information
                 $info = debug_backtrace();
 
@@ -888,7 +902,7 @@ class sql_cl extends octoms {
         }
 
         // Something went wrong
-        if ($this->result === false) {
+        if ($this->_result === false) {
             throw new Exception(sprintf('Verify your syntax: (%s)', $querySting));
             return false;
         }
@@ -904,7 +918,7 @@ class sql_cl extends octoms {
      * @return int|boolean Number of rows or false on error
      */
     public function num_rows() {
-        return $this->result instanceof mysqli_result ? mysqli_num_rows($this->result) : false;
+        return $this->_result instanceof mysqli_result ? mysqli_num_rows($this->_result) : false;
     }
 
     /**
@@ -914,28 +928,26 @@ class sql_cl extends octoms {
      * @return int|boolean
      */
     public function insert_id() {
-        return ($this->result !== false) ? mysqli_insert_id() : false;
+        return ($this->_result !== false) ? mysqli_insert_id() : false;
     }
 
     /**
      * Parse the return array
      * 
      * @example foreach($result->rows() AS $key=>value)... 
-     * @return array|boolean false
+     * @return array|boolean Rows on success, false on failure
      */
     public function rows() {
         // Initialize the rows
-        if ($this->result instanceof mysqli_result) {
-            if ($this->rows === false) {
-                while (false !== ($row = mysqli_fetch_assoc($this->result))) {
-                    $this->rows[] = $row;
+        if ($this->_result instanceof mysqli_result) {
+            if (false === $this->_rows) {
+                $this->_rows = array();
+                while ($row = mysqli_fetch_assoc($this->_result)) {
+                    $this->_rows[] = $row;
                 }
             }
-            return $this->rows;
-        } else {
-            throw new Exception('Invalid result.');
-            return false;
         }
+        return $this->_rows;
     }
 
     /**
@@ -948,21 +960,19 @@ class sql_cl extends octoms {
      * Returns the resource or false if the query failed.
      */
     public function result() {
-        return $this->result;
+        return $this->_result;
     }
 
     /**
      * Return the first element of the result array
      * 
      * @example $result->first();
-     * @return array|boolean false
+     * @return array|boolean
      */
     public function first() {
-        if ($this->rows === false) {
-            return($this->rows() === false) ? false : reset($this->rows);
-        } else {
-            return reset($this->rows);
-        }
+        return is_array($this->rows()) && count($this->rows())
+            ? reset($this->_rows)
+            : false;
     }
 
     /**
@@ -972,11 +982,9 @@ class sql_cl extends octoms {
      * @return array|boolean
      */
     public function last() {
-        if ($this->rows === false) {
-            return($this->rows() === false) ? false : end($this->rows);
-        } else {
-            return end($this->rows);
-        }
+        return is_array($this->rows()) && count($this->rows())
+            ? end($this->_rows)
+            : false;
     }
 
     /**
@@ -986,11 +994,9 @@ class sql_cl extends octoms {
      * @return array|boolean
      */
     public function next() {
-        if ($this->rows === false) {
-            return($this->rows() === false) ? false : next($this->rows);
-        } else {
-            return next($this->rows);
-        }
+        return is_array($this->rows()) && count($this->rows())
+            ? next($this->_rows)
+            : false;
     }
 
     /**
@@ -1000,11 +1006,9 @@ class sql_cl extends octoms {
      * @return array|boolean false
      */
     public function prev() {
-        if ($this->rows === false) {
-            return($this->rows() === false) ? false : prev($this->rows);
-        } else {
-            return prev($this->rows);
-        }
+        return is_array($this->rows()) && count($this->rows())
+            ? prev($this->_rows)
+            : false;
     }
 }
     

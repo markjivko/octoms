@@ -123,8 +123,8 @@ class error_cl {
         octoms('html', OMS_CH);
         return highlight(
                 str_replace(array('<br />', "\n"), "\r\n", var_export(
-                                $data,
-                                true
+                    $data,
+                    true
                 )),
                 null,
                 array('class' => 'code')
@@ -322,16 +322,13 @@ class error_cl {
             octoms('csv', OMS_CL)->insert(
                 array(
                     array(
-                        microtime(true),
                         date('H:i:s'),
-                        $message,
-                        $file,
-                        $line,
-                        $_SERVER['REQUEST_URI'],
-                        $_GET,
-                        $_POST,
-                        $_SERVER['REMOTE_ADDR'],
-                        isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : null
+                        "$file:$line",
+                        var_export($message, true),
+                        $_SERVER['REMOTE_ADDR'] . $_SERVER['REQUEST_URI'],
+                        isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : null,
+                        var_export($_GET, true),
+                        var_export($_POST, true),
                     )
                 ),
                 $f = APP_ERR . DS . 'log' . DS . date('d-m-Y') . '.csv'

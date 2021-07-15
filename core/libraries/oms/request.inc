@@ -17,33 +17,33 @@ class request_cl {
      * 
      * @var int
      */
-    var $code;
+    public $code;
 
     /**
      * Store the response headers
      * 
      * @var array
      */
-    var $headers;
+    public $headers;
 
     /**
      * Store the response body
      * 
      * @var string
      */
-    var $body = '';
+    public $body = '';
 
     /**
      * Count the redirects
      */
-    var $redirects = 0;
+    public $redirects = 0;
 
     /**
      * Defined html methods
      * 
      * @var array
      */
-    var $http_methods = array(
+    public $http_methods = array(
         'GET',
         'POST'
     );
@@ -53,7 +53,7 @@ class request_cl {
      * 
      * @var int
      */
-    var $maxRedirects = 5;
+    public $maxRedirects = 5;
 
     /**
      * Load a given web page with the set driver

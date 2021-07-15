@@ -98,7 +98,7 @@ class octoms {
      * </ul>
      * @param string $name - desired name
      * @param string $stage - optional stage to load the model from
-     * @param bool $forceStage - load the optional stage model even if this is called from a valid controller
+     * @param boolean $forceStage - load the optional stage model even if this is called from a valid controller
      * @return object|boolean
      * 
      */
@@ -262,6 +262,20 @@ class octoms {
             // Break the path_info into URL segments; ignore the _GET params
             self::$oms_url_segments = !empty($path_info) ? explode(WS, $path_info) : array();
 
+            // Get the last element
+            $last = end(self::$oms_url_segments);
+            self::$oms_info['ext'] = false;
+            if (null !== $last && false !== strpos($last, '.')) {
+                // Get the extension
+                if (strlen(self::$oms_info['ext'] = substr($last, strrpos($last, '.') + 1)) == 0) {
+                    self::$oms_info['ext'] = false;
+                }
+
+                // Replace the last element of the URL
+                $path_info = substr($path_info, 0, strrpos($path_info, '.'));
+                self::$oms_url_segments[count(self::$oms_url_segments) - 1] = substr($last, 0, strrpos($last, '.'));
+            }
+
             // Find the language; {site}/{language - 2 characters}/{page}; default: en
             self::$oms_info['lang'] = DEFAULT_LANGUAGE;
             if (preg_match('%^([a-z]{2}/?)%i', $path_info, $reg)) {
@@ -305,7 +319,7 @@ class octoms {
      * $this->__invoke(); # PHP <5.3.x; same as $this();
      * 
      * @param string $s - the help term
-     * @param bool $export - wether or not to export $s
+     * @param boolean $export - wether or not to export $s
      */
     public final function __invoke($s = null, $export = false) {
         // Help is available in development mode and if we haven't called the debugger
@@ -776,7 +790,7 @@ function octoms($object = null, $objectType = OMS_CL) {
  * help('foo');
  * 
  * @param string $s - The search term
- * @param boolean $export - Use the wizard to var_dump a variable
+ * @param boolean $export - Use the wizard to export a variable
  * @return The Wizard
  * 
  */

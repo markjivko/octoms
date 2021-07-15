@@ -402,7 +402,6 @@ class csv_cl {
  * CSV instances
  * 
  * @package OctoMS
- * @version 0.1
  */
 class csv_cl_i extends csv_cl {
 
