@@ -19,36 +19,37 @@ class sql_cl extends octoms {
 
     /**
      * The MySQL connection instance
-     * @var resource
+     * 
+     * @var mysqli
      */
-    static $instance;
+    public static $instance;
 
     /**
      * Query cache for the Run method
      * @var array
      */
-    static $cache;
+    public static $cache;
 
     /**
      * Query result
-     * @var resource/boolean false
+     * @var mysqli_result|boolean
      */
-    var $result;
+    public $result;
 
     /**
      * Query rows
      */
-    var $rows;
+    public $rows;
 
     /**
      * More convenient than constants
      * Used for the where clause helper
      * And & Or
      */
-    var $AND = 1;
-    var $OR = 2;
-    var $LIKE = '!like!';
-    var $NOT = '!not!';
+    public $AND = 1;
+    public $OR = 2;
+    public $LIKE = '!like!';
+    public $NOT = '!not!';
 
     /**
      * Class constructor
@@ -493,7 +494,7 @@ class sql_cl extends octoms {
                 $this->db();
             }
         }
-
+        
         return $this;
     }
 
@@ -787,7 +788,7 @@ class sql_cl extends octoms {
         $args = func_get_args();
 
         // Get the query string
-        $q = array_shift($args);
+        $querySting = array_shift($args);
 
         // Check for extra parameters
         if (!empty($args)) {
@@ -801,7 +802,7 @@ class sql_cl extends octoms {
             }
 
             // Verify the semantics
-            if (substr_count($q, '%s') > count($args)) {
+            if (substr_count($querySting, '%s') > count($args)) {
                 throw new Exception('Query arguments count and function parameters count do not match.');
                 return false;
             }
@@ -810,10 +811,10 @@ class sql_cl extends octoms {
             array_walk($args, create_function('$str', 'return mysqli_real_escape_string($str);'));
 
             // Use the custom table prefix; add the query to the args list
-            array_unshift($args, str_replace('{pref}', DB_PREF, $q));
+            array_unshift($args, str_replace('{pref}', DB_PREF, $querySting));
 
             // Use arguments
-            $q = call_user_func_array('sprintf', $args);
+            $querySting = call_user_func_array('sprintf', $args);
         }
 
         // Debugging?
@@ -828,20 +829,20 @@ class sql_cl extends octoms {
             }
 
             // Get the start time
-            $sql_time = microtime(true);
+            $sqlTime = microtime(true);
 
             // Execute the query
-            $this->result = mysqli_query(self::$instance, $q);
+            $this->result = mysqli_query(self::$instance, $querySting);
 
             // Total execution time
-            $sql_time = number_format(microtime(true) - $sql_time, 6);
+            $sqlTime = number_format(microtime(true) - $sqlTime, 6);
 
             // Save the data
             octoms::$oms_info['sql']['n']++;
-            octoms::$oms_info['sql']['t'] += $sql_time;
+            octoms::$oms_info['sql']['t'] += $sqlTime;
             $data = array(
-                'query' => $q,
-                'execution' => $sql_time . ' seconds',
+                'query' => $querySting,
+                'execution' => $sqlTime . ' seconds',
             );
             foreach (debug_backtrace() AS $i => $d) {
                 if (isset($d['file']) && isset($d['line']) && strpos($d['file'], 'octoms' . EXT) === false && strpos($d['file'], 'index.php') === false) {
@@ -851,16 +852,16 @@ class sql_cl extends octoms {
             octoms::$oms_info['sql']['q'][] = $data;
         } else {
             // Get the start time
-            $sql_time = microtime(true);
+            $sqlTime = microtime(true);
 
             // Execute the query
-            $this->result = mysqli_query(self::$instance, $q);
+            $this->result = mysqli_query(self::$instance, $querySting);
 
             // Total execution time
-            $sql_time = microtime(true) - $sql_time;
+            $sqlTime = microtime(true) - $sqlTime;
 
             // Long query?
-            if ($sql_time >= sql_cl::long_query_step) {
+            if ($sqlTime >= sql_cl::long_query_step) {
                 // Get the caller information
                 $info = debug_backtrace();
 
@@ -875,20 +876,20 @@ class sql_cl extends octoms {
 
                 // Log this as an error
                 octoms('error', OMS_CL)->log(
-                        sprintf(
-                                'Long query (%ss): "%s"',
-                                number_format($sql_time, 6),
-                                $q
-                        ),
-                        $file,
-                        $line
+                    sprintf(
+                        'Long query (%ss): "%s"',
+                        number_format($sqlTime, 6),
+                        $querySting
+                    ),
+                    $file,
+                    $line
                 );
             }
         }
 
         // Something went wrong
         if ($this->result === false) {
-            throw new Exception(sprintf('Verify your syntax: (%s)', $q));
+            throw new Exception(sprintf('Verify your syntax: (%s)', $querySting));
             return false;
         }
 
@@ -900,10 +901,10 @@ class sql_cl extends octoms {
      * Count the number of rows a SQL result has
      * 
      * @example $result->num_rows();
-     * @return int|boolean |umber of rows or false
+     * @return int|boolean Number of rows or false on error
      */
     public function num_rows() {
-        return is_resource($this->result) ? mysqli_num_rows($this->result) : false;
+        return $this->result instanceof mysqli_result ? mysqli_num_rows($this->result) : false;
     }
 
     /**
@@ -924,7 +925,7 @@ class sql_cl extends octoms {
      */
     public function rows() {
         // Initialize the rows
-        if (is_resource($this->result)) {
+        if ($this->result instanceof mysqli_result) {
             if ($this->rows === false) {
                 while (false !== ($row = mysqli_fetch_assoc($this->result))) {
                     $this->rows[] = $row;
@@ -943,15 +944,11 @@ class sql_cl extends octoms {
      * @example $this->sql->result();
      * $this->sql->query("...")->result();
      * 
-     * @return resource|false <br/>
+     * @return mysqli_result|boolean <br/>
      * Returns the resource or false if the query failed.
      */
     public function result() {
-        if (is_resource($this->result)) {
-            return $this->result;
-        } else {
-            return ($this->result === true) ? true : false;
-        }
+        return $this->result;
     }
 
     /**
