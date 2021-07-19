@@ -8,7 +8,7 @@
 
 A small, self-documenting PHP framework
 
-Project [created in 2012](https://code.google.com/archive/p/fervoare-cms/) and ported to GitHub in 2021.
+Project [created in 2011](https://code.google.com/archive/p/octoms/) and ported to GitHub in 2021.
 
 ## Getting started
 
