@@ -31,8 +31,6 @@ This project is inspired by [CodeIgniter](https://codeigniter.com)'s approach to
 
 ## In the wild
 
-There were(/are) multiple projects developed on top of OctoMS.
-
 Although no longer maintained, [Fervoare CMS](https://github.com/Stephino/fervoare) is an example of a fully-featured content management system built with OctoMS.
 
 **Warning!**
