@@ -17,6 +17,16 @@ class sql_cl extends octoms {
      * @var float
      */
     const LONG_QUERY_STEP = 1;
+    
+    /**
+     * More convenient than constants
+     * Used for the where clause helper
+     * And & Or
+     */
+    const AND  = 1;
+    const OR   = 2;
+    const LIKE = '!like!';
+    const NOT  = '!not!';
 
     /**
      * The MySQL connection instance
@@ -45,16 +55,6 @@ class sql_cl extends octoms {
      * @var array|boolean
      */
     protected $_rows = false;
-
-    /**
-     * More convenient than constants
-     * Used for the where clause helper
-     * And & Or
-     */
-    public $AND = 1;
-    public $OR = 2;
-    public $LIKE = '!like!';
-    public $NOT = '!not!';
 
     /**
      * Class constructor
@@ -97,7 +97,7 @@ class sql_cl extends octoms {
     protected function _case($set = '', $by = '', $cases = array()) {
         $when = '';
         
-        foreach ($cases AS $k => $v) {
+        foreach ($cases as $k => $v) {
             $when .= sprintf(
                 ' WHEN \'%s\' THEN \'%s\' ',
                 $this->escape($k),
@@ -171,29 +171,29 @@ class sql_cl extends octoms {
 
         // Apply the reverse polish notation (rpn)
         $rpn = array();
-        foreach ($args AS $a) {
+        foreach ($args as $arg) {
             // Add an element
-            if (is_array($a)) {
+            if (is_array($arg)) {
                 // Perform regex searches?
-                if (in_array($this->LIKE, $a, true)) {
-                    $a = array_diff($a, array($this->LIKE));
+                if (in_array(self::LIKE, $arg, true)) {
+                    $arg = array_diff($arg, array(self::LIKE));
                     $like = true;
                 } else {
                     $like = false;
                 }
 
                 // Is this a negative?
-                if (in_array($this->NOT, $a, true)) {
-                    $a = array_diff($a, array($this->NOT));
+                if (in_array(self::NOT, $arg, true)) {
+                    $arg = @array_diff($arg, array(self::NOT));
                     $not = true;
                 } else {
                     $not = false;
                 }
 
                 // Multiple fields argument?
-                if (count($a) > 1) {
+                if (count($arg) > 1) {
                     $rpnp = array();
-                    foreach ($a AS $k => $v) {
+                    foreach ($arg as $k => $v) {
                         // Sanitize the values
                         $v = is_array($v) 
                             ? array_map(array($this, 'escape'), $v) 
@@ -213,13 +213,13 @@ class sql_cl extends octoms {
                         );
                     }
                     $rpn[] = '(' . implode(' AND ', $rpnp) . ')';
-                } elseif (count($a) == 1) {
+                } elseif (count($arg) == 1) {
                     // Get the key
-                    $k = array_keys($a);
+                    $k = array_keys($arg);
                     $k = $k[0];
 
                     // Get the values
-                    $v = array_values($a);
+                    $v = array_values($arg);
                     $v = $v[0];
 
                     // Sanitize the values
@@ -242,11 +242,11 @@ class sql_cl extends octoms {
                 }
             }
             // Add an operator
-            elseif (in_array($a, array($this->AND, $this->OR))) {
+            elseif (in_array($arg, array(self::AND, self::OR))) {
                 $e1 = array_pop($rpn);
                 $e2 = array_pop($rpn);
                 if (!is_null($e1) && !is_null($e2)) {
-                    $rpn[] = ($a == $this->AND)
+                    $rpn[] = ($arg == self::AND)
                         ? ('(' . $e2 . ' AND ' . $e1 . ')')
                         : ('(' . $e2 . ' OR ' . $e1 . ')');
                 } elseif (!is_null($e1)) {
@@ -257,9 +257,9 @@ class sql_cl extends octoms {
 
         // If the user did not provide enough operators, fill in with AND
         if (count($rpn) > 1) {
-            foreach ($rpn AS $k => $a) {
+            foreach ($rpn as $k => $arg) {
                 if ($k != 0) {
-                    $rpn[0] .= ' AND ' . $a;
+                    $rpn[0] .= ' AND ' . $arg;
                 }
             }
         }
@@ -284,7 +284,7 @@ class sql_cl extends octoms {
     public function update($table = '', $set = array(), $whereClause = '') {
         // Prepare the SQL set
         $sqlSet = array();
-        foreach ($set AS $k => $v) {
+        foreach ($set as $k => $v) {
             $sqlSet[] = sprintf(
                 '`%s` = \'%s\'',
                 $this->escape($k),
@@ -332,7 +332,7 @@ class sql_cl extends octoms {
 
         // Load the cases
         $cases = array();
-        foreach ($args AS $a) {
+        foreach ($args as $a) {
             if (count($a) == 3) {
                 $cases[] = sprintf(
                     '`%s` = (%s)',
@@ -354,8 +354,8 @@ class sql_cl extends octoms {
      * $this->sql->_select(null,'table');
      * // SELECT `a`,`b` FROM `table`
      * $this->sql->_select(array('a','b'),'table');
-     * // SELECT `a`, COUNT(`b`) AS `count` FROM `table`
-     * $this->sql->_select('`a`, COUNT(`b`) AS `count`','table');
+     * // SELECT `a`, COUNT(`b`) as `count` FROM `table`
+     * $this->sql->_select('`a`, COUNT(`b`) as `count`','table');
      * // SELECT * FROM `table` WHERE `a` = 'b'
      * $this->sql->_select(null,'table',$this->sql->_where(array('a'=>'b')));
      * 
@@ -407,7 +407,7 @@ class sql_cl extends octoms {
      */
     public function insert($table = '', $set = array()) {
         $sqlSet = array();
-        foreach ($set AS $k => $v) {
+        foreach ($set as $k => $v) {
             $sqlSet[] = sprintf('`%s` = \'%s\'',
                 $this->escape($k),
                 $this->escape($v)
@@ -440,7 +440,7 @@ class sql_cl extends octoms {
         $keyCount = count($keys);
 
         // Prepare the values for the insert
-        foreach ($values AS $k => $v) {
+        foreach ($values as $k => $v) {
             // This must be an array
             if (!is_array($v))
                 $v = (array) $v;
@@ -624,9 +624,9 @@ class sql_cl extends octoms {
     public function decompress($str = '') {
         if (false === ($str = @base64_decode($str))) {
             return false;
-        } else {
-            return strlen($str) > 0 ? @gzuncompress($str) : false;
-        }
+        } 
+        
+        return strlen($str) > 0 ? @gzuncompress($str) : false;
     }
 
     /**
@@ -762,7 +762,7 @@ class sql_cl extends octoms {
             $query = '';
 
             // Run through each line
-            foreach (file($f) AS $k => $line) {
+            foreach (file($f) as $k => $line) {
                 // Verify this line is not a comment
                 if (!preg_match('/^[ ]*-.*/i', $line)) {
                     $query .= $line;
@@ -807,7 +807,7 @@ class sql_cl extends octoms {
         // Check for extra parameters
         if (!empty($args)) {
             // Sanitize input
-            foreach ($args AS $k => $v) {
+            foreach ($args as $k => $v) {
                 if (is_array($v) || is_object($v)) {
                     $args[$k] = $this->serialize($v);
                 } else {
@@ -858,7 +858,7 @@ class sql_cl extends octoms {
                 'query' => $querySting,
                 'execution' => $sqlTime . ' seconds',
             );
-            foreach (debug_backtrace() AS $i => $d) {
+            foreach (debug_backtrace() as $i => $d) {
                 if (isset($d['file']) && isset($d['line']) && strpos($d['file'], 'octoms' . EXT) === false && strpos($d['file'], 'index.php') === false) {
                     $data['trace:' . $i] = str_replace(DS, '/', $d['file']) . ', line ' . $d['line'];
                 }
@@ -903,8 +903,7 @@ class sql_cl extends octoms {
 
         // Something went wrong
         if ($this->_result === false) {
-            throw new Exception(sprintf('Verify your syntax: (%s)', $querySting));
-            return false;
+            throw new Exception(sprintf('Verify your syntax: %s', $querySting) . ', ' . self::$mysqli->error);
         }
 
         // All good
@@ -928,13 +927,13 @@ class sql_cl extends octoms {
      * @return int|boolean
      */
     public function insert_id() {
-        return ($this->_result !== false) ? mysqli_insert_id() : false;
+        return ($this->_result !== false) ? mysqli_insert_id(self::$mysqli) : false;
     }
 
     /**
      * Parse the return array
      * 
-     * @example foreach($result->rows() AS $key=>value)... 
+     * @example foreach($result->rows() as $key=>value)... 
      * @return array|boolean Rows on success, false on failure
      */
     public function rows() {

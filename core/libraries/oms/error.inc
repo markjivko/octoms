@@ -65,7 +65,7 @@ class error_cl {
         // Show the backtrace
         $code = '';
         $debug_bt = array_reverse($debugBacktrace);
-        foreach ($debug_bt AS $debug) {
+        foreach ($debug_bt as $debug) {
             if (isset($debug['line']) && isset($debug['file']) && strpos($debug['file'], 'octoms' . EXT) === false && strpos($debug['file'], 'index.php') === false) {
                 if (($debug['file'] == $errfile && $debug['line'] != $errline) || $debug['file'] != $errfile) {
                     $code .= '<h3 class="th">&#x25BC; ' . $debug['file'] . '</h3>';
@@ -198,7 +198,7 @@ class error_cl {
         $info->d = null;
 
         // Search string
-        $info->s = 'about -stage=main';
+        $info->s = 'about';
 
         // Set the error report
         $info->e = json_encode(
@@ -264,7 +264,7 @@ class error_cl {
         $info->d = null;
 
         // Search string
-        $info->s = 'about -stage=main';
+        $info->s = 'about';
 
         // Set the exception report
         $info->x = json_encode(

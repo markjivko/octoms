@@ -148,7 +148,7 @@ class zip_cl {
 
         // Format the "replaceFiles"
         $rf = array();
-        foreach ($replaceFiles AS $k => $v) {
+        foreach ($replaceFiles as $k => $v) {
             $rf[str_replace(array('/', '\\'), DS, $k)] = $v;
         }
 

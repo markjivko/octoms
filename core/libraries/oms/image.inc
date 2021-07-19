@@ -506,7 +506,7 @@ class image_cl {
         // Are there any filters?
         if ($filters != '' && $filters != null) {
             // Apply the filters
-            foreach ((array) explode(',', $filters) AS $filter) {
+            foreach ((array) explode(',', $filters) as $filter) {
                 // The filter must be a string
                 if (!is_string($filter))
                     continue;

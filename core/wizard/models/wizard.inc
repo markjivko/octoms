@@ -15,7 +15,6 @@
  * 
  * @package OctoMS
  * @subpackage wizard model
- * @version 0.1
  * 
  */
 class wizard_m extends octoms {
@@ -170,7 +169,7 @@ class wizard_m extends octoms {
             unset($reg);
 
             // Search through each comment
-            foreach ($r AS $k => $v) {
+            foreach ($r as $k => $v) {
                 // Skip this if it is not a method of if it is the constructor
                 if (strpos($r2[$k], 'function') === false || strpos($r2[$k], '__construct') !== false) {
                     continue;
@@ -181,7 +180,7 @@ class wizard_m extends octoms {
 
                 // Make keys unique
                 $i = 1;
-                foreach ($m[1] AS $_k => $_v) {
+                foreach ($m[1] as $_k => $_v) {
                     if ($_v == 'param') {
                         $m[1][$_k] = $_v . ' ' . $i++;
                     }
@@ -201,7 +200,7 @@ class wizard_m extends octoms {
                 $r[$k]['res']['obj'] = str_replace(array(EXT, DS), '', substr($file, strrpos($file, DS)));
 
                 // Valuable result? (case insensitive search)
-                foreach (explode(' ', trim($term)) AS $t) {
+                foreach (explode(' ', trim($term)) as $t) {
                     // Not found within the example or no example set 
                     if ((isset($r[$k]['example']) && strpos(strtolower($r[$k]['example']), strtolower($t)) === false) || !isset($r[$k]['example'])) {
                         // Also not found within the description?
@@ -269,7 +268,7 @@ class wizard_m extends octoms {
 
         // Decide where to look
         if (count($location) > 0) {
-            foreach ($location AS $l) {
+            foreach ($location as $l) {
                 // Search through the core libraries and helpers
                 if ($l == 'core') {
                     $dirs[] = CORE_LIB . DS . 'oms';
@@ -303,14 +302,18 @@ class wizard_m extends octoms {
             $dirs[] = CORE_HELP;
             $dirs[] = APP_LIB;
             $dirs[] = APP_HELP;
-            // @TODO include all stages
+            foreach (glob(STAGES . '/*/*', GLOB_ONLYDIR) as $dirPath) {
+                if (in_array(basename($dirPath), array('models', 'controllers'))) {
+                    $dirs[] = $dirPath;
+                }
+            }
         }
         
         // Make sure the directories are unique
         $dirs = array_unique($dirs);
         
         // Make a file list
-        foreach ($dirs AS $dir) {
+        foreach ($dirs as $dir) {
             if (is_dir($dir) && false !== ($h = opendir($dir))) {
                 while (false !== ($f = readdir($h))) {
                     // Append the search results
@@ -336,7 +339,7 @@ class wizard_m extends octoms {
      */
     public function highlight(&$code) {
         $array = array();
-        foreach (explode("\n", $code) AS $_l => $_c) {
+        foreach (explode("\n", $code) as $_l => $_c) {
             $array[$_l] = str_replace(
                     '&lt;?php',
                     '',
@@ -393,7 +396,7 @@ class wizard_m extends octoms {
      */
     public function help($term = null, $loc = 'search') {
         if ($loc == 'search') {
-            return 'You can search for any term inside your source code; try "about -stage=main"';
+            return 'You can search for any term inside your source code; try "about"';
         } else {
             return 'This will show debug information on the specified absolute path';
         }

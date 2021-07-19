@@ -103,7 +103,6 @@ if (!function_exists('untiny')) {
  * Algorithm reference: http://www.schneier.com/paper-blowfish-fse.html
  *
  * @use blowfish_encrypt, blowfish_decrypt
- * @author Matt Harris
  */
 class Blowfish {
 

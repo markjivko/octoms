@@ -102,7 +102,7 @@ class request_cl {
         // Set the headers
         if (!is_null($headers) && is_array($headers)) {
             $httpheaders = array();
-            foreach ($headers AS $key => $value) {
+            foreach ($headers as $key => $value) {
                 $httpheaders[] = sprintf(
                         '%s: %s',
                         $key,
@@ -194,7 +194,7 @@ class request_cl {
         // Prepare the headers
         if (is_array($headers)) {
             $p['http']['header'] = array();
-            foreach ($headers AS $key => $value) {
+            foreach ($headers as $key => $value) {
                 $p['http']['header'][] = ucfirst(strtolower($key)) . ': ' . $value;
             }
         }

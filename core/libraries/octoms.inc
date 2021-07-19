@@ -185,7 +185,7 @@ class octoms {
                     // Bind previously loaded objects to the model
                     $this->$name = self::$oms_objects[$o];
                     if ($type == OMS_M) {
-                        foreach (self::$oms_objects AS $key => $obj) {
+                        foreach (self::$oms_objects as $key => $obj) {
                             if ($o != $key) {
                                 $key = substr($key, 0, strrpos($key, '_'));
                                 $this->$name->$key = $obj;
@@ -351,7 +351,7 @@ class octoms {
             : null;
 
         // The help term must be a string
-        $info->s = (empty($s) || $export !== false) ? 'about -stage=main' : strval($s);
+        $info->s = (empty($s) || $export !== false) ? 'about' : strval($s);
 
         // Get the Debug information
         $info->d = $_SERVER['REQUEST_URI'];
@@ -445,7 +445,6 @@ class octoms {
         while (@ob_end_clean());
 
         // Export the data
-        header('Content-type:text/plain', true);
         print @blowfish_encrypt(json_encode($save));
     }
 
@@ -521,7 +520,7 @@ class octoms {
                         $this->__oms4($object, $name);
 
                         // Parse the parameters
-                        foreach ($parameters AS $k => $v) {
+                        foreach ($parameters as $k => $v) {
                             $parameters[$k] = urldecode($v);
                         }
 
@@ -555,14 +554,14 @@ class octoms {
 
             // Then the libraries
             if (count($helpers) > 0) {
-                foreach ($helpers AS $h) {
+                foreach ($helpers as $h) {
                     $this->_($h, OMS_CH);
                 }
             }
 
             // Then the libraries
             if (count($objects) > 0) {
-                foreach ($objects AS $obj) {
+                foreach ($objects as $obj) {
                     $this->_($obj);
                 }
             }
@@ -587,7 +586,7 @@ class octoms {
         // Get all the defined autoload arrays - for objects (o) and helpers (h)
         $o = array();
         $h = array();
-        foreach ($locations AS $k => $l) {
+        foreach ($locations as $k => $l) {
             if (file_exists($l)) {
                 $objects = array();
                 $helpers = array();
@@ -595,7 +594,7 @@ class octoms {
 
                 if (count($objects) > 0) {
                     // Load the objects
-                    foreach ($objects AS $o) {
+                    foreach ($objects as $o) {
                         if (strpos($o, '|') !== false) {
                             $exp = explode('|', $o);
                             $o = $exp[0];
@@ -620,7 +619,7 @@ class octoms {
                 }
                 if (count($helpers) > 0) {
                     // Load helpers thus far
-                    foreach ($helpers AS $h) {
+                    foreach ($helpers as $h) {
                         if (strpos($h, '|') !== false) {
                             $exp = explode('|', $h);
                             $h = $exp[0];
@@ -646,7 +645,7 @@ class octoms {
 
         // Bind all objects to the one provided
         if (!empty(self::$oms_objects)) {
-            foreach (self::$oms_objects AS $key => $obj) {
+            foreach (self::$oms_objects as $key => $obj) {
                 $key = substr($key, 0, strrpos($key, '_'));
                 $object->$key = $obj;
             }
@@ -675,7 +674,7 @@ class octoms {
         );
 
         // Start parsing the routing info
-        foreach ($locations AS $k => $c) {
+        foreach ($locations as $k => $c) {
             // The stage is decided last
             if ($k == 's') {
                 $stage = substr($path_info, 0, strpos($path_info, WS));
@@ -763,7 +762,7 @@ class octoms {
 function octoms($object = null, $objectType = OMS_CL) {
     if (!is_null($object)) {
         $result = null;
-        foreach (array_keys(octoms::$oms_objects) AS $key) {
+        foreach (array_keys(octoms::$oms_objects) as $key) {
             $root = substr($key, 0, strrpos($key, '_'));
             if ($key == $object || $root == $object) {
                 $result = octoms::$oms_objects[$key];
@@ -883,7 +882,7 @@ function flag($data = null) {
 
     // Set multiple flags
     if (count($args = func_get_args()) > 1) {
-        foreach ($args AS $a) {
+        foreach ($args as $a) {
             octoms::$oms_info['flags']
                     [str_replace(DS, '/', $info['file'])]
                     ['line ' . $info['line']]

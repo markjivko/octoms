@@ -97,7 +97,7 @@ class input_cl {
         } else {
             if (is_array($val)) {
                 $arr = array();
-                foreach ($val AS $v) {
+                foreach ($val as $v) {
                     if (isset($sg[$v])) {
                         $arr[$v] = $sg[$v];
                     } else {
@@ -145,7 +145,7 @@ class input_cl {
 
         if (is_array($var)) {
             $result = array();
-            foreach ($var AS $k => $v) {
+            foreach ($var as $k => $v) {
                 if (!is_null($v) && !is_null($v = $this->get($v, $clean, true))) {
                     $result[$k] = $v;
                 }
@@ -158,7 +158,7 @@ class input_cl {
 
             // Apply the filters
             if (is_array($clean) && count($clean) > 0) {
-                foreach ($clean AS $filter) {
+                foreach ($clean as $filter) {
                     if (method_exists($this, 'clean_' . $filter)) {
                         $var = call_user_func_array(array($this, 'clean_' . $filter), array($var));
                     }
@@ -189,7 +189,7 @@ class input_cl {
 
         // Unset the value
         if (is_array($key)) {
-            foreach ($key AS $k) {
+            foreach ($key as $k) {
                 @eval('unset($_' . strtoupper($sg) . '[$k]);');
             }
         } elseif (!is_null($key)) {
@@ -230,7 +230,7 @@ class input_cl {
 
         if (is_array($var)) {
             $result = array();
-            foreach ($var AS $k => $v) {
+            foreach ($var as $k => $v) {
                 if (!is_null($v) && !is_null($v = $this->post($v, $clean, true))) {
                     $result[$k] = $v;
                 }
@@ -243,7 +243,7 @@ class input_cl {
 
             // Apply the filters
             if (is_array($clean) && count($clean) > 0) {
-                foreach ($clean AS $filter) {
+                foreach ($clean as $filter) {
                     if (method_exists($this, 'clean_' . $filter)) {
                         $var = call_user_func_array(array($this, 'clean_' . $filter), array($var));
                     }
@@ -432,7 +432,7 @@ class input_cl {
         if (is_dir($dir)) {
             $filesFound = array();
             if (false !== $files = scandir($dir)) {
-                foreach ($files AS $file) {
+                foreach ($files as $file) {
                     if (is_file($dir . DS . $file)) {
                         $filesFound[] = array(
                             'name' => $file,
@@ -654,7 +654,7 @@ class input_cl {
             return $html;
 
         // Close the HTML tags
-        foreach (array_reverse($o[1]) AS $k => $v) {
+        foreach (array_reverse($o[1]) as $k => $v) {
             if (!in_array($v, $c[1])) {
                 $html .= '</' . $v . '>';
             } else {

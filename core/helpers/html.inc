@@ -37,7 +37,14 @@ if (!function_exists('a')) {
         if (empty($href)) {
             $href = '#';
         }
-
+        
+        // Custom extension
+        if (!preg_match('%^https?\:\/\/%i', $href) && strlen($extension = octoms('settings', OMS_L)->get('seo.general_extension'))) {
+            if (!preg_match('%\.' . preg_quote($extension) . '$%i', $href)) {
+                $href .= '.' . $extension;
+            }
+        }
+        
         // Seed the options
         $options = array_merge((array) $options, array('href' => $href));
 
@@ -252,7 +259,7 @@ if (!function_exists('highlight')) {
         $result = "";
 
         // Parse each line
-        foreach (explode("\r", highlight_string($str, true)) AS $line) {
+        foreach (explode("\r", highlight_string($str, true)) as $line) {
             if (preg_match('%^<br[\s]*/>%i', $line)) {
                 // Get the line
                 $line = preg_replace('%<br[\s]*/>([^\n]*)\n*[^\e]*%i', '$1', $line);
@@ -462,18 +469,19 @@ if (!function_exists('input')) {
         if (!empty($name)) {
             if (is_array($name)) {
                 $options['name'] = array_shift($name);
-                $options['id'] = array_shift($name);
             } else {
                 $options['name'] = $name;
-                $options['id'] = $name;
             }
         }
 
         // Add the value
-        if (empty($value) && isset($options['name']) && @isset($_POST[$options['name']])) {
+        if (empty($value) && isset($options['name']) && is_array($_POST) && isset($_POST[$options['name']])) {
             $value = $_POST[$options['name']];
         }
         $options['value'] = $value;
+        if ('hidden' !== $type && isset($options['name'])) {
+            $options['id'] = $options['name'];
+        }
 
         // Return the input
         return tag('input', $options, null, true);
@@ -541,7 +549,7 @@ if (!function_exists('l')) {
     function l($elements = array(), $ordered = false, $options = array()) {
         $result = '';
         if (is_array($elements)) {
-            foreach ($elements AS $key => $element) {
+            foreach ($elements as $key => $element) {
                 // Add some li options?
                 $opt = array();
                 if (preg_match('/^\[([^\]]*?)\]/i', is_numeric($key) ? $element : $key, $r)) {
@@ -562,7 +570,7 @@ if (!function_exists('l')) {
                     }
 
                     // Parse each one; if no = is found, presume that is the ID
-                    foreach ($exp AS $e) {
+                    foreach ($exp as $e) {
                         if (false !== strpos($e, '=')) {
                             $exp2 = explode('=', $e);
                             // Append the class?
@@ -661,7 +669,7 @@ if (!function_exists('lang_select')) {
     function lang_select() {
         // Prepare the list
         $langs = array();
-        foreach (explode(',', LANGUAGES) AS $l) {
+        foreach (explode(',', LANGUAGES) as $l) {
             $langs[i18n_baseurl(here(), $l)] = $l;
         }
 
@@ -761,7 +769,7 @@ if (!function_exists('radio')) {
             $options['type'] = 'radio';
 
             $alts = '';
-            foreach ($alternatives AS $k => $v) {
+            foreach ($alternatives as $k => $v) {
                 if ($k == $selected) {
                     $options['checked'] = 'checked';
                 } else {
@@ -864,7 +872,7 @@ if (!function_exists('select')) {
 
             // Prepare the alternatives
             $alts = '';
-            foreach ($alternatives AS $k => $v) {
+            foreach ($alternatives as $k => $v) {
                 $opt = array('value' => $k);
                 if (strval($k) == strval($selected)) {
                     $opt['selected'] = 'selected';
@@ -891,7 +899,7 @@ if (!function_exists('submit')) {
      * 
      * 
      * @param string $value - The submit text
-     * @param bool $img - True for image, False for text (default)
+     * @param boolean $img - True for image, False for text (default)
      * @param array $options
      * @return string - HTML submit input element
      */
@@ -1043,7 +1051,7 @@ if (!function_exists('tag')) {
         }
 
         // Parse the rest of the keys
-        foreach (array_keys($options) AS $key) {
+        foreach (array_keys($options) as $key) {
             if (!is_numeric($key)) {
                 $attr[] = $key . '="' . htmlentities(strval($options[$key]), ENT_QUOTES, 'UTF-8') . '"';
             } else {
@@ -1083,10 +1091,8 @@ if (!function_exists('textarea')) {
         if (!empty($name)) {
             if (is_array($name)) {
                 $options['name'] = array_shift($name);
-                $options['id'] = array_shift($name);
             } else {
                 $options['name'] = $name;
-                $options['id'] = $name;
             }
         }
 
@@ -1139,7 +1145,7 @@ if (!function_exists('validate')) {
             if (preg_match_all('/regex:\s?(([^\e]{1})([^\2]*?)\2([imxu]*)){1}/i', $rule, $regs, PREG_PATTERN_ORDER)) {
 
                 // Get the regex(es)
-                foreach ($regs[1] AS $regex) {
+                foreach ($regs[1] as $regex) {
                     // Validate the regex
                     if (!preg_match($regex, $field)) {
                         return 'RegEx ' . $regex;
@@ -1160,7 +1166,7 @@ if (!function_exists('validate')) {
                 }
 
                 // Parse each rule
-                foreach ($rule AS $r) {
+                foreach ($rule as $r) {
                     // Set the length
                     if (0 === strpos($r, 'length:')) {
                         $r = substr($r, strpos($r, ':') + 1);
@@ -1231,7 +1237,7 @@ if (!function_exists('validate')) {
             $errors = array();
 
             // Process each field
-            foreach ($rules AS $field => $rule) {
+            foreach ($rules as $field => $rule) {
                 // If the rule was not passed
                 if (true !== $v = validate($field, $rule)) {
                     // Save this error

@@ -23,9 +23,9 @@ class csv_cl {
             $result = "";
 
             // Process each row
-            foreach ($array AS $row => $columns) {
+            foreach ($array as $row => $columns) {
                 if (is_array($columns) && count($columns) > 0) {
-                    foreach ($columns AS $k => $col) {
+                    foreach ($columns as $k => $col) {
                         // Boolean or null?
                         if (is_bool($col) || is_null($col)) {
                             if (is_bool($col)) {
@@ -88,14 +88,14 @@ class csv_cl {
         $csv = explode("\r\n", $csv);
 
         // Break each line into an array of columns
-        foreach ($csv AS $row => $line) {
+        foreach ($csv as $row => $line) {
             if (!is_null($line)) {
                 // Get the columns
                 @preg_match_all('/(?:^|,)?("(?:[^"]+|"")*"|[^,]*)/', $line, $regs);
                 $line = isset($regs[1]) ? $regs[1] : array();
 
                 // Format each cell
-                foreach ($line AS $k => $v) {
+                foreach ($line as $k => $v) {
                     if (!is_null($v)) {
                         // Remove outside double quotes
                         if (preg_match('/^"(.*)"$/i', $v)) {

@@ -164,7 +164,7 @@ class view_cl {
 
                 if (method_exists($object = new $controller, $method)) {
                     // Bind all the autoload objects
-                    foreach (octoms::$oms_objects AS $key => $obj) {
+                    foreach (octoms::$oms_objects as $key => $obj) {
                         $key = substr($key, 0, strrpos($key, '_'));
                         $object->$key = $obj;
                     }
@@ -222,7 +222,7 @@ class view_cl_helper extends view_cl {
 
                 // Use local variables?
                 if (is_array($this->data) && count($this->data) > 0) {
-                    foreach ($this->data AS $key => $value) {
+                    foreach ($this->data as $key => $value) {
                         if (!is_numeric($key) && !is_numeric(substr($key, 0, 1)) && $key != 'this') {
                             $$key = $value;
                         }
@@ -267,7 +267,7 @@ class view_cl_helper extends view_cl {
             $v = $this->data[$variableName];
 
             if (!is_null($variableChildren)) {
-                foreach (explode('.', $variableChildren) AS $c) {
+                foreach (explode('.', $variableChildren) as $c) {
                     if (is_object($v))
                         $v = object_to_array($v);
                     if (!is_array($v)) {

@@ -1,5 +1,4 @@
-<?php if(!defined('OCTOMS')){header('HTTP/1.1 403');die('{"error":"forbidden"}');}?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<?php if(!defined('OCTOMS')){header('HTTP/1.1 403');die('{"error":"forbidden"}');}?><!doctype html>
 <html lang="en">
     <head>
         <title>OctoMS Help</title>
@@ -67,6 +66,6 @@
         </script>
         <script type="text/javascript" src="<?php echo WIZARD;?>/js/common/jquery.js"></script>
         <script type="text/javascript" src="<?php echo WIZARD;?>/js/common/jquery-ui.js"></script>
-        <script type="text/javascript" src="<?php echo WIZARD;?>/js/functions.js"></script>
+        <script type="text/javascript" async defer src="<?php echo WIZARD;?>/js/functions.js"></script>
     </body>
 </html>

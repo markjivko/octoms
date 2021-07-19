@@ -122,7 +122,7 @@ class session_cl {
     public function set() {
         $params = func_get_args();
         if (isset($params[0]) && is_array($params[0])) {
-            foreach ($params AS $k => $v) {
+            foreach ($params as $k => $v) {
                 $_SESSION[$k] = $v;
             }
         } elseif (isset($params[0]) && isset($params[1])) {
@@ -144,7 +144,7 @@ class session_cl {
     public function get($keys = null) {
         if (is_array($keys)) {
             $result = array();
-            foreach ($keys AS $k) {
+            foreach ($keys as $k) {
                 $result[$k] = isset($_SESSION[$k]) ? $_SESSION[$k] : null;
             }
             return $result;
@@ -167,7 +167,7 @@ class session_cl {
      */
     public function reset($keys = null) {
         if (is_array($keys)) {
-            foreach ($keys AS $k) {
+            foreach ($keys as $k) {
                 unset($_SESSION[$k]);
             }
         } elseif (is_string($keys)) {
@@ -191,7 +191,7 @@ class session_cl {
     public function flash_set() {
         $params = func_get_args();
         if (isset($params[0]) && is_array($params[0])) {
-            foreach ($params[0] AS $k => $v) {
+            foreach ($params[0] as $k => $v) {
                 $_SESSION['__flash__'][$k] = $v;
             }
         } elseif (isset($params[0]) && isset($params[1])) {
@@ -213,7 +213,7 @@ class session_cl {
     public function flash_get($keys = null) {
         if (is_array($keys)) {
             $result = array();
-            foreach ($keys AS $k) {
+            foreach ($keys as $k) {
                 $result[$k] = isset($_SESSION['__flash__'][$k]) ? $_SESSION['__flash__'][$k] : null;
                 unset($_SESSION['__flash__'][$k]);
             }
@@ -265,15 +265,19 @@ class session_cl {
      */
     public function cookie_set($value, $name = COOKIE_NAME, $expire = COOKIE_EXPIRE) {
         // Set the cookie if the value is not empty
-        return empty($value) 
-            ? false 
-            : setcookie(
-                $name, 
-                blowfish_encrypt(json_encode($value)), 
-                (time() + $expire), 
-                COOKIE_PATH, 
-                DOMAIN 
-            );
+        $result = false;
+        if (!empty($value)) {
+            $cookieName = preg_replace('%\W+%', '', $name);
+            $cookieValue = urlencode(blowfish_encrypt(json_encode($value)));
+            $cookieExpires = date("D, d M Y H:i:s", time() + $expire) . 'GMT';
+            $cookiePath = COOKIE_PATH;
+            $cookieDomain = DOMAIN;
+            
+            // Set the cookie
+            header("Set-Cookie: $cookieName=$cookieValue; Expires=$cookieExpires; Path=$cookiePath; Domain=$cookieDomain; SameSite=Strict");
+            $result = true;
+        }
+        return $result;
     }
 
     /**

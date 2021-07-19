@@ -21,7 +21,7 @@ if (!function_exists('ago')) {
      * ago(1333361278,true);
      * 
      * @param string $time - Unix Timestamp
-     * @param bool $rcs - Wether to show recursive time, up to the second
+     * @param boolean $rcs - Wether to show recursive time, up to the second
      * @return string - How much time has passed
      */
     function ago($time, $rcs = false) {
@@ -107,7 +107,7 @@ if (!function_exists('array_flat')) {
     function array_flat($array = array()) {
         $r = array();
 
-        foreach ($array AS $a) {
+        foreach ($array as $a) {
             if (!is_array($a)) {
                 $r[] = $a;
             } else {
@@ -144,7 +144,7 @@ if (!function_exists('array_is_assoc')) {
         }
 
         // Check associativity
-        return (bool) count(array_filter(array_keys($array), 'is_string'));
+        return (boolean) count(array_filter(array_keys($array), 'is_string'));
     }
 }
 
@@ -167,14 +167,14 @@ if (!function_exists('array_structure')) {
     function array_structure($array, $rules) {
         // Prepare the result
         $result = array();
-        foreach ($rules AS $key => $value) {
+        foreach ($rules as $key => $value) {
             if ($value === 'root') {
                 $result[$key] = $array[$key];
             } elseif (isset($result[$value])) {
 
                 // Prepare the new rules
                 $nr = array();
-                foreach ($rules AS $k => $v) {
+                foreach ($rules as $k => $v) {
                     // Replace the current value with "root"
                     if ($v === $value) {
                         $nr[$k] = 'root';
@@ -293,7 +293,7 @@ if (!function_exists('array_to_xml')) {
 
             // Append the extra data
             if (count($attributes) > 0) {
-                foreach ($attributes AS $a) {
+                foreach ($attributes as $a) {
                     $exp = explode('=', $a);
                     if (!isset($a[1]))
                         $a[1] = '';
