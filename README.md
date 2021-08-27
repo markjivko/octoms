@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://stephino.github.io/octoms/">
+    <a href="https://markjivko.com/octoms/">
         <img src="https://repository-images.githubusercontent.com/385881254/ca37305d-1281-4ce4-8b20-2a9d2d3c16c4"/>
     </a>
 </p>
@@ -20,7 +20,7 @@ git clone https://github.com/stephino/octoms .
 
 ## Quick demo
 
-You can access this [static DEMO](https://stephino.github.io/octoms/) for a very short introduction to the wizard interface or
+You can access this [static DEMO](https://markjivko.com/octoms/) for a very short introduction to the wizard interface or
 you can navigate to the following address:
 
 ```
