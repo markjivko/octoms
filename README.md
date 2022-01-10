@@ -15,7 +15,7 @@ Project [created in 2011](https://code.google.com/archive/p/octoms/) and ported 
 Assuming you have installed a [LAMP Stack](https://en.wikipedia.org/wiki/LAMP_(software_bundle)) on your machine, navigate to your `www` folder and run the following command:
 
 ```
-git clone https://github.com/stephino/octoms .
+git clone https://github.com/markjivko/octoms .
 ```
 
 ## Quick demo
@@ -33,7 +33,7 @@ This project is inspired by [CodeIgniter](https://codeigniter.com)'s approach to
 
 ## In the wild
 
-Although no longer maintained, [Fervoare CMS](https://github.com/Stephino/fervoare) is an example of a fully-featured content management system built with OctoMS.
+Although no longer maintained, [Fervoare CMS](https://github.com/markjivko/fervoare) is an example of a fully-featured content management system built with OctoMS.
 
 **Warning!**
 
